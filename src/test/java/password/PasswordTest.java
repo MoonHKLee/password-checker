@@ -1,8 +1,9 @@
-package passwordChecker;
+package password;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PasswordTest {
 
@@ -53,5 +54,13 @@ class PasswordTest {
         String password = "Aaaaaaa0";
         PasswordSecurityGrade result = PasswordChecker.check(password);
         assertThat(result).isEqualTo(PasswordSecurityGrade.STRONG);
+    }
+
+    @Test
+    @DisplayName("입력값이 NULL일 경우 예외처리")
+    void test5() {
+        assertThatThrownBy(() -> PasswordChecker.check(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage(BusinessExceptionMessage.NULL_INPUT);
     }
 }

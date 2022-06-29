@@ -1,6 +1,5 @@
 package password;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,59 +7,57 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PasswordTest {
 
     @Test
-    @DisplayName("0개를 충족하는 경우 비밀번호 약함")
-    void test1() {
-        String password = "aaaa";
-        PasswordSecurityGrade result = PasswordChecker.check(password);
-        assertThat(result).isEqualTo(PasswordSecurityGrade.WEAK);
+    void 입력값이_NULL인_경우() {
+        String input = null;
+
+        assertThatThrownBy(()->PasswordChecker.check(input))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("입력값이 NULL 입니다.");
     }
 
     @Test
-    @DisplayName("1개를 충족하는 경우 비밀번호 약함")
-    void test2() {
-
-        String password1 = "aaaaaaaa";
-        String password2 = "aaa0";
-        String password3 = "Aaaa";
-
-        PasswordSecurityGrade result1 = PasswordChecker.check(password1);
-        PasswordSecurityGrade result2 = PasswordChecker.check(password2);
-        PasswordSecurityGrade result3 = PasswordChecker.check(password3);
-
-        assertThat(result1).isEqualTo(PasswordSecurityGrade.WEAK);
-        assertThat(result2).isEqualTo(PasswordSecurityGrade.WEAK);
-        assertThat(result3).isEqualTo(PasswordSecurityGrade.WEAK);
+    void 아무것도_충족하지_않으면_규칙은_약함이다() {
+        passwordAssert("asdf",PasswordLevel.WEAK);
     }
 
     @Test
-    @DisplayName("2개를 충족하는 경우 비밀번호 중간")
-    void test3() {
-        String password1 = "aaaaaaaa0";
-        String password2 = "aaaaaaaaA";
-        String password3 = "A9";
-
-        PasswordSecurityGrade result1 = PasswordChecker.check(password1);
-        PasswordSecurityGrade result2 = PasswordChecker.check(password2);
-        PasswordSecurityGrade result3 = PasswordChecker.check(password3);
-
-        assertThat(result1).isEqualTo(PasswordSecurityGrade.NORMAL);
-        assertThat(result2).isEqualTo(PasswordSecurityGrade.NORMAL);
-        assertThat(result3).isEqualTo(PasswordSecurityGrade.NORMAL);
+    void 길이가_8글자_이상() {
+        passwordAssert("aaaaaaaa",PasswordLevel.WEAK);
     }
 
     @Test
-    @DisplayName("3개를 충족하는 경우 비밀번호 강함")
-    void test4() {
-        String password = "Aaaaaaa0";
-        PasswordSecurityGrade result = PasswordChecker.check(password);
-        assertThat(result).isEqualTo(PasswordSecurityGrade.STRONG);
+    void 숫자0에서_9사이를_포함() {
+        passwordAssert("0",PasswordLevel.WEAK);
     }
 
     @Test
-    @DisplayName("입력값이 NULL일 경우 예외처리")
-    void test5() {
-        assertThatThrownBy(() -> PasswordChecker.check(null))
-            .isInstanceOf(NullPointerException.class)
-            .hasMessage(BusinessExceptionMessage.NULL_INPUT);
+    void 대문자를_포함() {
+        passwordAssert("A",PasswordLevel.WEAK);
     }
+
+    @Test
+    void 길이가_8글자_이상이고_0에서9사이의_숫자를_포함() {
+        passwordAssert("aaaaaaa8",PasswordLevel.NORMAL);
+    }
+
+    @Test
+    void 길이가_8글자_이상이고_대문자를_포함() {
+        passwordAssert("aaaaaaaA",PasswordLevel.NORMAL);
+    }
+
+    @Test
+    void 숫자0에서9사이_그리고_대문자를_포함() {
+        passwordAssert("0A",PasswordLevel.NORMAL);
+    }
+
+    @Test
+    void 모든_규칙을_준수한다() {
+        passwordAssert("0aaaaaaA",PasswordLevel.STRONG);
+    }
+
+    private void passwordAssert(String actual, String expect) {
+        String result = PasswordChecker.check(actual);
+        assertThat(result).isEqualTo(expect);
+    }
+
 }
